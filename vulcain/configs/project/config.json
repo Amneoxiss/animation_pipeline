@@ -1,0 +1,18 @@
+{
+    "WINDOWS_SERVEUR_PATH": "",
+    "LINUX_SERVEUR_PATH":  "",
+    "MACOS_SERVEUR_PATH": "",
+    "PROJECT_PATH": "",
+    "PROJECT_NAME": "",
+    "RND_TRIGRAMME": "",
+    "DEV_TRIGRAMME": "",
+    "FAB_TRIGRAMME": "",
+    "WRITING_FOLDER":"10_writing",
+    "PROD_FOLDER": "20_prod",
+    "OTHER_FOLDER": "30_other",
+    "RND_FOLDER": "40_rnd",
+    "DEV_FOLDER": "50_dev",
+    "FAB_FOLDER": "60_fab",
+    "USERS_FOLDER": "70_users",
+    "OCIO":""
+}

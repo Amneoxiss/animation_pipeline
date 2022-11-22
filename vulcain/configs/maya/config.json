@@ -1,0 +1,13 @@
+{
+    "plugin_list": "None",
+    "framerate": "pal",
+    "up_axis": "Y",
+    "base_group":{
+                  "ALL": "root",
+                  "GEO": "ALL",
+                  "REFS": "ALL",
+                  "HELP": "ALL",
+                  "GROOM": "HELP",
+                  "TRASH": "root"
+    }
+}
