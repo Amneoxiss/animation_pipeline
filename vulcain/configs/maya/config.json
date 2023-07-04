@@ -1,13 +1,31 @@
 {
     "plugin_list": "None",
+    "assetbase_plugin": "",
+    "rig_plugin":"",
+    "render_engine" :"",
     "framerate": "pal",
     "up_axis": "Y",
-    "base_group":{
-                  "ALL": "root",
-                  "GEO": "ALL",
-                  "REFS": "ALL",
-                  "HELP": "ALL",
-                  "GROOM": "HELP",
-                  "TRASH": "root"
+    
+    "assetbase_group": {
+        "MDB": "root",
+        "GEO": "MDB",
+        "HELP": "MDB",
+        "GROOM": "HELP",
+        "CLOTH": "HELP",
+        "REF": "MDB",
+        "CTN": "MDB",
+        "TRASH": "root"
+    },
+    
+    "setdress_group": {
+        "ALL": "root",
+        "STG": "ALL"
+    },
+
+    "shot_group": {
+        "ALL": "root",
+        "ACT": "ALL",
+        "PRP": "ALL",
+        "STG": "ALL"
     }
 }

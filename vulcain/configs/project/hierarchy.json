@@ -14,5 +14,15 @@
     "DEV_FOLDER": "50_dev",
     "FAB_FOLDER": "60_fab",
     "USERS_FOLDER": "70_users",
-    "OCIO":""
+    "OCIO":"",
+
+    "assets_template": {
+        "modelbase": "root",
+        "cloth": "root",
+        "design": "root",
+        "groom": "root",
+        "lookdev": "root",
+        "rig": "root",
+        "texturing": "root"
+    }
 }
