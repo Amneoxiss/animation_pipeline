@@ -1,12 +1,12 @@
 {
     "plugin_list": "None",
-    "assetbase_plugin": "",
+    "modelbase_plugin": "",
     "rig_plugin":"",
     "render_engine" :"",
     "framerate": "pal",
     "up_axis": "Y",
     
-    "assetbase_group": {
+    "modelbase_group": {
         "MDB": "root",
         "GEO": "MDB",
         "HELP": "MDB",
@@ -24,7 +24,7 @@
 
     "shot_group": {
         "ALL": "root",
-        "ACT": "ALL",
+        "CHR": "ALL",
         "PRP": "ALL",
         "STG": "ALL"
     }
