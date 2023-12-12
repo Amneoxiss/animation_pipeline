@@ -1,36 +1,89 @@
 import sys
+import traceback
+
+from vulcain.python.procedure.shared.vulcain_arg import VArg
 from vulcain.python.pipeline_exceptions import ArgumentMissing
+import vulcain.python.logger as log
+
+
+logger = log.Logger(name="Maya Procedure")
 
 class MayaProcedure():
-    def __init__(self, gui=False, **kwargs):
+    required_param = {}
+    optional_patam = {}
+
+    def __init__(self, **kwargs):
+        self.execution_from_ddc = True  # TODO: Find a way to known if were in a shell or in a dcc
+
+    def execute(self, **kwargs):
+
         if not kwargs:
             kwargs = self.parse_arguments()
-            print(kwargs)
+            logger.debug(kwargs)
         else:
-            print(kwargs)
+            logger.debug(kwargs)
 
-    def execute(self):
+        for key, value in kwargs.items():
+            if key == "varg":
+                kwargs["varg"] == VArg(value)
+
+        if not self.execution_from_ddc:
+            import maya.standalone
+            maya.standalone.initialize(name="Python")
+
+        # CHECK PROCEDURE
+        check_before_procedure_fail = False
+        try:
+            self.check_before_procedure(**kwargs)
+        except Exception as err:
+            traceback.print_exc()
+            logger.error(err)
+            check_before_procedure_fail = True
+
+        if check_before_procedure_fail:
+            try:
+                self.revert_check_procedure(**kwargs)
+                self.end_execute(check_fail=True, check_revert_fail=False)
+            except Exception as err:
+                self.end_execute(check_fail=True, check_revert_fail=True)
+
+            return
+
+        # PROCEDURE
         procedure_fail = False
         try:
-            self.procedure()
+            self.procedure(**kwargs)
         except Exception as err:
-            print(err)
+            traceback.print_exc()
+            logger.error(err)
             procedure_fail = True
 
         if procedure_fail:
             try:
-                self.revert_procedure()
+                self.revert_procedure(**kwargs)
                 self.end_execute(fail=True, revert_fail=False)
-            except:
+            except Exception as err:
                 self.end_execute(fail=True, revert_fail=True)
         else:
             self.end_execute()
 
-    def procedure(self):
-        pass
+        if not self.execution_from_ddc:
+            maya.standalone.uninitialize()
 
-    def revert_procedure(self):
-        pass
+    def check_before_procedure(self, **kwargs):
+        logger.debug("There is no check procedure implemented.")
+
+    def revert_check_procedure(self, **kwargs):
+        logger.debug("There is no revert check procedure implemented.")
+
+    def procedure(self, **kwargs):
+        raise NotImplementedError()
+
+    def revert_procedure(self, **kwargs):
+        logger.debug("There is no revert procedure implemented.")
+
+    def end_execute(fail=False, revert_fail=False):
+        logger.info("END PROCEDURE")
 
     def parse_arguments(self):
         keyword_args = {}
@@ -52,11 +105,8 @@ class MayaProcedure():
                     keyword_args[key] = True
             i += 1
         if not keyword_args:
-            raise ArgumentMissing
+            raise ArgumentMissing()
         return keyword_args
-
-    def end_execute(fail=False, revert_fail=False):
-        pass
 
 
 if __name__ == "__main__":

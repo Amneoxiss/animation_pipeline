@@ -1,0 +1,42 @@
+{
+    "project.resolution.width": 1920,
+    "project.resolution.height": 1080,
+    "project.fps": 24,
+
+    "maya.framerate": "film",
+    "maya.up_axis": "Y",
+    "maya.plugin_list": "None",
+    "maya.modelbase_plugin": "",
+    "maya.rig_plugin":"",
+    "maya.render_engine" :"",
+
+    "modelbase_base_group": {
+        "MDB": "root",
+        "GEO": "MDB",
+        "HELP": "MDB",
+        "GROOM": "HELP",
+        "CLOTH": "HELP",
+        "SCATTER": "HELP",
+        "REFS": "MDB",
+        "CTN": "root",
+        "TRASH": "root"
+    },
+
+    "rig_base_group": {
+        "STP": "root",
+        "RIG": "STP",
+        "CTRL": "STP",
+        "TRASH": "root"
+    },
+
+    "setdress_group": {
+        "STG": "root"
+    },
+
+    "shot_group": {
+        "ALL": "root",
+        "CHR": "ALL",
+        "PRP": "ALL",
+        "STG": "ALL"
+    }
+}

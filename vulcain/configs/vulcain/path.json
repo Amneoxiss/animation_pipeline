@@ -1,0 +1,13 @@
+{
+    "ROOT_PATH":{
+        "env_root_dir_path": "${IN:project_path}/${IN:exec_env}"
+    },
+
+    "ASSETS":{
+        "section_dir_path": "${env_root_path}/assets",
+        "entity_type_dir_path": "${section_dir_path}/${IN:entity_type}",
+        "entity_name_dir_path": "${entity_type_dir_path}/${IN:entity_name}",
+        "task_dir_path": "${entity_name_dir_path}/${IN:task}",
+        "step_dir_path": "${task_dir_path}/${IN:step}"
+    }
+}

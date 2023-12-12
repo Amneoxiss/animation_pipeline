@@ -1,0 +1,13 @@
+{
+    "RND_TRIGRAMME": "rnd",
+    "DEV_TRIGRAMME": "dev",
+    "FAB_TRIGRAMME": "fab",
+    "PIPELINE_DIR_NAME": "pipeline",
+    "USERS_DIR_NAME": "users",
+    "WRITING_DIR_NAME": "writing",
+    "PREPROD_DIR_NAME": "preprod",
+    "PROD_DIR_NAME": "prod",
+    "RND_DIR_NAME": "rnd",
+    "DEV_DIR_NAME": "dev",
+    "FAB_DIR_NAME": "fab"
+}
