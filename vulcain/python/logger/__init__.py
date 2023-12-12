@@ -16,7 +16,7 @@ class HostnameFilter(logging.Filter):
 class Logger():
     def __init__(self, name="Vulcain", 
                  default_level=logging.INFO, 
-                 log_format="[%(asctime)s] - [%(hostname)s][%(ip)s] - [%(name)s] - [%(levelname)s] :\n%(message)s\n", 
+                 log_format="[%(asctime)s] - [%(hostname)s][%(ip)s] - [%(name)s] - [%(levelname)s] :%(message)s", 
                  date_format="%Y-%b-%d %H:%M:%S"):
         self.LOGGER_NAME = name
         self.LEVEL_DEFAULT = default_level
