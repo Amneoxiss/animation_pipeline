@@ -1,7 +1,7 @@
 import traceback
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List 
+from typing import Any 
 
 
 from vulcain.python.procedure.shared.vulcain_arg import VArg
@@ -15,11 +15,11 @@ logger = Logger(name="Maya Procedure")
 class ProcedureContext:
     varg: VArg
     path_maker_context: dict = {}
+    return_value: Any = None
     any_context: dict = {}
 
 
 class Process(ABC):
-
     def __init__(self) -> None:
         self.failed_check: list = []
 
@@ -39,19 +39,58 @@ class Process(ABC):
         pass
 
 
-class Procedure(ABC):
-    def __init__(self, context):
-        self.execution_from_ddc = True  # TODO: Find a way to known if were in a shell or in a dcc
-        self.context: ProcedureContext = context
+class DCC(ABC):
+    @abstractmethod
+    def start_dcc():
+        pass
 
-    def execute(self, processes: list(Process)):
+    @abstractmethod
+    def stop_dcc():
+        pass
 
-        self.init_software()
+
+class Expander(ABC):
+    @abstractmethod
+    def before_check(context: ProcedureContext) -> ProcedureContext:
+        """"""
+
+    @abstractmethod
+    def after_check(context: ProcedureContext) -> ProcedureContext:
+        """"""
+
+    @abstractmethod
+    def before_execute(context: ProcedureContext) -> ProcedureContext:
+        """"""
+
+    @abstractmethod
+    def after_execute(context: ProcedureContext) -> ProcedureContext:
+        """"""
+
+    @abstractmethod
+    def before_revert(context: ProcedureContext) -> ProcedureContext:
+        """"""
+
+    @abstractmethod
+    def after_revert(context: ProcedureContext) -> ProcedureContext:
+        """"""
+
+
+class Procedure():
+    def __init__(self, processes: list(Process), context: ProcedureContext, expander: Expander = None, dcc: DCC = None):
+        self.processes = processes
+        self.context = context
+        self.expander = expander
+        self.dcc = dcc
+
+    def execute(self, processes: list(Process), expander: Expander = None):
+
+        if self.dcc:
+            self.dcc.start_dcc()
 
         # CHECK PROCEDURE
         check_before_procedure_fail = False
         try:
-            self.check_before_procedure()
+            self.context= self.check_processes(processes)
         except Exception as err:
             traceback.print_exc()
             logger.error(err)
@@ -84,22 +123,49 @@ class Procedure(ABC):
         else:
             self.end_execute()
 
-    @abstractmethod
-    def init_software(self):
-        """Method to start a software."""
+        if self.dcc:
+            self.dcc.stop_dcc()
 
-    @abstractmethod
-    def stop_sofware():
-        """Stop the software after the execution."""
-
-    @abstractmethod
-    def _execute_processes():
+    def check_processes(self, processes: list(Process), context: ProcedureContext) -> ProcedureContext:
         """"""
+        if self.expander:
+            context = self.expander.before_check(context)
+
+        for each in processes:
+            context = each.check()
+
+        if self.expander:
+            context = self.expander.after_check(context)
+
+        return context
     
-    @abstractmethod
-    def _check_processes():
+    def execute_processes(self, processes: list(Process), context: ProcedureContext) -> ProcedureContext:
         """"""
+        if self.expander:
+            context = self.expander.before_execute(context)
+        
+        for each in processes:
+            context = each.execute(context)
+
+        if self.expander:
+            context = self.expander.after_execute(context)
+
+        return context
+
+    def revert_processes(self, processes: list(Process), context: ProcedureContext) -> ProcedureContext:
+        """"""
+        if self.expander:
+            context = self.expander.before_revert(context)
+
+        for each in processes:
+            context = each.revert()
+
+        if self.expander:
+            context = self.expander.after_revert(context)
+
+        return context
+
 
 if __name__ == "__main__":
-    procedure = MayaProcedure()
+    procedure = Procedure()
     procedure.execute()
