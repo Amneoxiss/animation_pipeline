@@ -16,6 +16,7 @@ class ProcedureContext:
     varg: VArg
     name: str
     path_maker_context: dict = {}
+    input_args: dict = {}
     return_value: Any = None
     any_context: dict = {}
 
@@ -181,6 +182,7 @@ class Procedure():
 
         else:
             pass
+
 
 if __name__ == "__main__":
     procedure = Procedure()
