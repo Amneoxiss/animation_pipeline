@@ -7,6 +7,7 @@ from typing import Any
 from vulcain.python.procedure.shared.vulcain_arg import VArg
 from vulcain.python.pipeline_exceptions import ArgumentMissing
 from vulcain.python.logger import Logger
+from vulcain.python.procedure.shared.ui.procedure_ui import ProcedureUI
 
 logger = Logger(name="Maya Procedure")
 
@@ -17,8 +18,8 @@ class ProcedureContext:
     name: str
     path_maker_context: dict = {}
     input_args: dict = {}
-    return_value: Any = None
     any_context: dict = {}
+    return_value: Any = None
 
 
 class Process(ABC):
@@ -79,43 +80,42 @@ class Expander(ABC):
 
 
 class Procedure():
-    def __init__(self, processes: list(Process), context: ProcedureContext, expander: Expander = None, dcc: DCC = None):
+    def __init__(self, processes: list(Process), context: ProcedureContext, ui: ProcedureUI = None, expander: Expander = None, dcc: DCC = None):
         self.processes = processes
         self.context = context
+        self.ui = ui
         self.expander = expander
         self.dcc = dcc
-        self.check_fail = False
-        self.execute_fail = False
-        self.revert_fail = False
+        self.wrong_check: str = ""
+        self.check_fail: bool = False
+        self.execute_fail: bool = False
+        self.revert_fail: bool = False
 
-    def launch(self, processes: list(Process), expander: Expander = None):
-
+    def launch(self, processes: list(Process)):
         if self.dcc:
             self.dcc.start_dcc()
 
         try:
             self.context= self.check_processes(processes)
-        except Process.CheckFailed as check_fail:
-            self.check_fail
+        except Process.CheckFailed as wrong_check:
+            self.wrong_check = wrong_check
             self.check_fail = True
-        except Exception as err:
-            traceback.print_exc()
-            logger.error(err)
+        except Exception:
+            logger.exception("Exception occured while checking before execution.")
             self.check_fail = True
 
         if not self.check_fail:
             try:
-                self.execute_processes()
-            except Exception as err:
-                traceback.print_exc()
-                logger.error(err)
+                self.execute_processes(processes)
+            except Exception:
+                logger.exception("Exception occured while executing the procedure.")
                 self.execute_fail = True
 
         if self.execute_fail or self.check_fail:
             try:
-                self.revert_processes()
-            except Exception as err:
-                logger.error(err)
+                self.revert_processes(processes)
+            except Exception:
+                logger.exception("Exception occured while reverting the procedure.")
                 self.revert_fail = True
 
         if self.dcc:
@@ -166,22 +166,26 @@ class Procedure():
 
         return context
 
-
     def end_launch(self):
         if self.check_fail and not self.revert_fail:
-            pass
+            wrong_checks = "\n- ".join(self.wrong_check)
+            message = f"Some checks are wrong. Execution can't start.\n{wrong_checks}"
+            self.ui.show_end_fail_message(self.context.name, message)
 
         elif self.check_fail and self.revert_fail:
-            pass
+            message = f"Revert procedure failed after a check fail."
+            self.ui.show_end_fail_message(self.context.name)
 
         elif self.execute_fail and not self.revert_fail:
-            pass
+            message = f"Execution has failed."
+            self.ui.show_end_fail_message(self.context.name)
 
         elif self.execute_fail and self.revert_fail:
-            pass
+            message = f"Revert procedure failed after an execution fail."
+            self.ui.show_end_fail_message(self.context.name, message)
 
         else:
-            pass
+            self.ui.show_end_success_message(self.context.name)
 
 
 if __name__ == "__main__":
