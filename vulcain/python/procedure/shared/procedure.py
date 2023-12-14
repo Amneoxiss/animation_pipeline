@@ -14,6 +14,7 @@ logger = Logger(name="Maya Procedure")
 @dataclass
 class ProcedureContext:
     varg: VArg
+    name: str
     path_maker_context: dict = {}
     return_value: Any = None
     any_context: dict = {}
@@ -22,6 +23,7 @@ class ProcedureContext:
 class Process(ABC):
     def __init__(self) -> None:
         self.failed_check: list = []
+        self.has_run = False
 
     @abstractmethod
     def check(context: ProcedureContext) -> ProcedureContext:
@@ -81,50 +83,46 @@ class Procedure():
         self.context = context
         self.expander = expander
         self.dcc = dcc
+        self.check_fail = False
+        self.execute_fail = False
+        self.revert_fail = False
 
-    def execute(self, processes: list(Process), expander: Expander = None):
+    def launch(self, processes: list(Process), expander: Expander = None):
 
         if self.dcc:
             self.dcc.start_dcc()
 
-        # CHECK PROCEDURE
-        check_before_procedure_fail = False
         try:
             self.context= self.check_processes(processes)
+        except Process.CheckFailed as check_fail:
+            self.check_fail
+            self.check_fail = True
         except Exception as err:
             traceback.print_exc()
             logger.error(err)
-            check_before_procedure_fail = True
+            self.check_fail = True
 
-        if check_before_procedure_fail:
+        if not self.check_fail:
             try:
-                self.revert_check_procedure()
-                self.end_execute(check_fail=True, check_revert_fail=False)
+                self.execute_processes()
             except Exception as err:
-                self.end_execute(check_fail=True, check_revert_fail=True)
+                traceback.print_exc()
+                logger.error(err)
+                self.execute_fail = True
 
-            return
-
-        # PROCEDURE
-        procedure_fail = False
-        try:
-            self.procedure()
-        except Exception as err:
-            traceback.print_exc()
-            logger.error(err)
-            procedure_fail = True
-
-        if procedure_fail:
+        if self.execute_fail or self.check_fail:
             try:
-                self.revert_procedure()
-                self.end_execute(fail=True, revert_fail=False)
+                self.revert_processes()
             except Exception as err:
-                self.end_execute(fail=True, revert_fail=True)
-        else:
-            self.end_execute()
+                logger.error(err)
+                self.revert_fail = True
 
         if self.dcc:
             self.dcc.stop_dcc()
+
+        self.end_launch()
+
+        return self.context.return_value
 
     def check_processes(self, processes: list(Process), context: ProcedureContext) -> ProcedureContext:
         """"""
@@ -138,7 +136,7 @@ class Procedure():
             context = self.expander.after_check(context)
 
         return context
-    
+
     def execute_processes(self, processes: list(Process), context: ProcedureContext) -> ProcedureContext:
         """"""
         if self.expander:
@@ -146,6 +144,7 @@ class Procedure():
         
         for each in processes:
             context = each.execute(context)
+            each.has_run = True
 
         if self.expander:
             context = self.expander.after_execute(context)
@@ -158,7 +157,8 @@ class Procedure():
             context = self.expander.before_revert(context)
 
         for each in processes:
-            context = each.revert()
+            if each.has_run :
+                context = each.revert()
 
         if self.expander:
             context = self.expander.after_revert(context)
@@ -166,6 +166,22 @@ class Procedure():
         return context
 
 
+    def end_launch(self):
+        if self.check_fail and not self.revert_fail:
+            pass
+
+        elif self.check_fail and self.revert_fail:
+            pass
+
+        elif self.execute_fail and not self.revert_fail:
+            pass
+
+        elif self.execute_fail and self.revert_fail:
+            pass
+
+        else:
+            pass
+
 if __name__ == "__main__":
     procedure = Procedure()
-    procedure.execute()
+    procedure.launch()
