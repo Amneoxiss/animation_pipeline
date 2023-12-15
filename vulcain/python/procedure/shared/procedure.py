@@ -24,7 +24,7 @@ class ProcedureContext:
 
 class Process(ABC):
     def __init__(self) -> None:
-        self._run_status = False
+        self._has_run = False
 
     @abstractmethod
     def check(self, context: ProcedureContext) -> ProcedureContext:
@@ -38,11 +38,11 @@ class Process(ABC):
     def revert(self, context: ProcedureContext) -> ProcedureContext:
         """Revert to do in case of fail execution."""
 
-    def set_run_status(self, status: bool) -> None:
-        self._run_status = status
+    def set_has_run(self, value: bool) -> None:
+        self._has_run = value
 
-    def get_run_status(self) -> bool:
-        return self._run_status
+    def get_has_run(self) -> bool:
+        return self._has_run
 
     class CheckFailed(Exception):
         pass
@@ -124,7 +124,7 @@ class ProcessExecutor(Executor):
         
         for each in processes:
             context = each.execute(context)
-            each.set_run_status(True)
+            each.set_has_run(True)
 
         self.after_execute.extend(context)
 
@@ -135,7 +135,7 @@ class ProcessExecutor(Executor):
         self.before_revert.extend(context)
 
         for each in processes:
-            if each.get_run_status():
+            if each.get_has_run():
                 context = each.revert()
 
         self.after_revert.extend(context)
