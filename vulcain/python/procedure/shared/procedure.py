@@ -24,20 +24,26 @@ class ProcedureContext:
 
 class Process(ABC):
     def __init__(self) -> None:
-        self.failed_check: list = []
-        self.has_run = False
+        self._failed_checks: list = []
+        self._run_status = False
 
     @abstractmethod
-    def check(context: ProcedureContext) -> ProcedureContext:
+    def check(self, context: ProcedureContext) -> ProcedureContext:
         """Check before executing."""
 
     @abstractmethod
-    def execute(context: ProcedureContext) -> ProcedureContext:
+    def execute(self, context: ProcedureContext) -> ProcedureContext:
         """Execute something to do."""
 
     @abstractmethod
-    def revert(context: ProcedureContext) -> ProcedureContext:
+    def revert(self, context: ProcedureContext) -> ProcedureContext:
         """Revert to do in case of fail execution."""
+
+    def set_run_status(self, status: bool) -> None:
+        self._run_status = status
+
+    def get_run_status(self) -> bool:
+        return self._run_status
 
     class CheckFailed(Exception):
         pass
@@ -45,39 +51,40 @@ class Process(ABC):
 
 class DCC(ABC):
     @abstractmethod
-    def start_dcc():
+    def start_dcc(self):
         pass
 
     @abstractmethod
-    def stop_dcc():
+    def stop_dcc(self):
         pass
 
 
 class Expander(ABC):
     @abstractmethod
-    def before_check(context: ProcedureContext) -> ProcedureContext:
+    def before_check(self, context: ProcedureContext) -> ProcedureContext:
         """"""
 
     @abstractmethod
-    def after_check(context: ProcedureContext) -> ProcedureContext:
+    def after_check(self, context: ProcedureContext) -> ProcedureContext:
         """"""
 
     @abstractmethod
-    def before_execute(context: ProcedureContext) -> ProcedureContext:
+    def before_execute(self, context: ProcedureContext) -> ProcedureContext:
         """"""
 
     @abstractmethod
-    def after_execute(context: ProcedureContext) -> ProcedureContext:
+    def after_execute(self, context: ProcedureContext) -> ProcedureContext:
         """"""
 
     @abstractmethod
-    def before_revert(context: ProcedureContext) -> ProcedureContext:
+    def before_revert(self, context: ProcedureContext) -> ProcedureContext:
         """"""
 
     @abstractmethod
-    def after_revert(context: ProcedureContext) -> ProcedureContext:
+    def after_revert(self, context: ProcedureContext) -> ProcedureContext:
         """"""
 
+# TODO: Create an ProcessIterator to take care of the check, execute and revert method of the Procedure.
 
 class Procedure():
     def __init__(self, processes: list(Process), context: ProcedureContext, ui: ProcedureUI = None, expander: Expander = None, dcc: DCC = None):
@@ -91,12 +98,12 @@ class Procedure():
         self.execute_fail: bool = False
         self.revert_fail: bool = False
 
-    def launch(self, processes: list(Process)):
+    def launch(self):
         if self.dcc:
             self.dcc.start_dcc()
 
         try:
-            self.context= self.check_processes(processes)
+            self.context= self.check_processes(self.processes)
         except Process.CheckFailed as wrong_check:
             self.wrong_check = wrong_check
             self.check_fail = True
@@ -106,14 +113,14 @@ class Procedure():
 
         if not self.check_fail:
             try:
-                self.execute_processes(processes)
+                self.execute_processes(self.processes)
             except Exception:
                 logger.exception("Exception occured while executing the procedure.")
                 self.execute_fail = True
 
         if self.execute_fail or self.check_fail:
             try:
-                self.revert_processes(processes)
+                self.revert_processes(self.processes)
             except Exception:
                 logger.exception("Exception occured while reverting the procedure.")
                 self.revert_fail = True
@@ -125,32 +132,32 @@ class Procedure():
 
         return self.context.return_value
 
-    def check_processes(self, processes: list(Process), context: ProcedureContext) -> ProcedureContext:
+    def check_processes(self) -> ProcedureContext:
         """"""
         if self.expander:
-            context = self.expander.before_check(context)
+            self.context = self.expander.before_check(self.context)
 
-        for each in processes:
-            context = each.check()
+        for each in self.processes:
+            self.context = each.check(self.context)
 
         if self.expander:
-            context = self.expander.after_check(context)
+            self.context = self.expander.after_check(self.context)
 
-        return context
+        return self.context
 
-    def execute_processes(self, processes: list(Process), context: ProcedureContext) -> ProcedureContext:
+    def execute_processes(self) -> ProcedureContext:
         """"""
         if self.expander:
-            context = self.expander.before_execute(context)
+            self.context = self.expander.before_execute(self.context)
         
-        for each in processes:
-            context = each.execute(context)
-            each.has_run = True
+        for each in self.processes:
+            self.context = each.execute(self.context)
+            each.set_run_status(True)
 
         if self.expander:
-            context = self.expander.after_execute(context)
+            self.context = self.expander.after_execute(self.context)
 
-        return context
+        return self.context
 
     def revert_processes(self, processes: list(Process), context: ProcedureContext) -> ProcedureContext:
         """"""
@@ -158,7 +165,7 @@ class Procedure():
             context = self.expander.before_revert(context)
 
         for each in processes:
-            if each.has_run :
+            if each.get_run_status() :
                 context = each.revert()
 
         if self.expander:
