@@ -48,13 +48,21 @@ class Process(ABC):
         pass
 
 
-class DCC(ABC):
+class Software(ABC):
     @abstractmethod
-    def start_dcc(self):
-        pass
+    def start(self):
+        """"""
 
     @abstractmethod
-    def stop_dcc(self):
+    def stop(self):
+        """"""
+
+
+class DefaultSoftware(Software):
+    def start(self):
+        pass
+
+    def stop(self):
         pass
 
 
@@ -136,12 +144,12 @@ class ProcessExecutor(Executor):
 
 
 class Procedure():
-    def __init__(self, processes: List[Process], context: ProcedureContext, executor: Executor, ui: ProcedureUI = None, dcc: DCC = None):
+    def __init__(self, processes: List[Process], context: ProcedureContext, executor: Executor, ui: ProcedureUI = None, dcc: Software = None):
         self.processes = processes
         self.context = context
         self.ui = ui
         self.executor = executor
-        self.dcc = dcc
+        self.dcc = dcc or DefaultSoftware()
         self.wrong_check: str = ""
         self.check_fail: bool = False
         self.execute_fail: bool = False
