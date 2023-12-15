@@ -1,4 +1,4 @@
-from vulcain.python.procedure.shared.ui.procedure_ui import ProcedureUI
+from vulcain.python.procedure.shared.uis.procedure_ui import ProcedureUI
 
 class TerminalUI(ProcedureUI):
     def show_end_success_message(procedure_name: str) -> None:

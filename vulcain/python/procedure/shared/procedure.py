@@ -1,13 +1,13 @@
-import traceback
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, List
 
-
 from vulcain.python.procedure.shared.vulcain_arg import VArg
-from vulcain.python.pipeline_exceptions import ArgumentMissing
 from vulcain.python.logger import Logger
-from vulcain.python.procedure.shared.ui.procedure_ui import ProcedureUI
+from vulcain.python.procedure.shared.uis.procedure_ui import ProcedureUI
+from vulcain.python.procedure.shared.software import Software, DefaultSoftware
+from vulcain.python.procedure.shared.process import Process
+from vulcain.python.procedure.shared.executor import Executor
 
 logger = Logger(name="Maya Procedure")
 
@@ -20,127 +20,6 @@ class ProcedureContext:
     input_args: dict = {}
     any_context: dict = {}
     return_value: Any = None
-
-
-class Process(ABC):
-    def __init__(self) -> None:
-        self._has_run = False
-
-    @abstractmethod
-    def check(self, context: ProcedureContext) -> ProcedureContext:
-        """Check before executing."""
-
-    @abstractmethod
-    def execute(self, context: ProcedureContext) -> ProcedureContext:
-        """Execute something to do."""
-
-    @abstractmethod
-    def revert(self, context: ProcedureContext) -> ProcedureContext:
-        """Revert to do in case of fail execution."""
-
-    def set_has_run(self, value: bool) -> None:
-        self._has_run = value
-
-    def get_has_run(self) -> bool:
-        return self._has_run
-
-    class CheckFailed(Exception):
-        pass
-
-
-class Software(ABC):
-    @abstractmethod
-    def start(self):
-        """"""
-
-    @abstractmethod
-    def stop(self):
-        """"""
-
-
-class DefaultSoftware(Software):
-    def start(self):
-        pass
-
-    def stop(self):
-        pass
-
-
-class Expander(ABC):
-    @abstractmethod
-    def extend(self, context: ProcedureContext) -> ProcedureContext:
-        """"""
-
-
-class DefaultExpander(Expander):
-    def extend(self, context: ProcedureContext) -> ProcedureContext:
-        return context
-
-
-class Executor(ABC):
-    @abstractmethod
-    def check_processes(self, processes: List[Process], context: ProcedureContext) -> ProcedureContext:
-        """"""
-
-    @abstractmethod
-    def execute_processes(self, processes: List[Process], context: ProcedureContext) -> ProcedureContext:
-        """"""
-
-    @abstractmethod
-    def revert_processes(self, processes: List[Process], context: ProcedureContext) -> ProcedureContext:
-        """"""
-
-
-class ProcessExecutor(Executor):
-    def __init__(self,
-                 before_check: Expander = None,
-                 after_check: Expander = None,
-                 before_execute: Expander = None,
-                 after_execute: Expander = None,
-                 before_revert: Expander = None,
-                 after_revert: Expander = None) -> None:
-
-        self.before_check = before_check or DefaultExpander()
-        self.after_check = after_check or DefaultExpander()
-        self.before_execute = before_execute or DefaultExpander()
-        self.after_execute = after_execute or DefaultExpander()
-        self.before_revert = before_revert or DefaultExpander()
-        self.after_revert = after_revert or DefaultExpander()
-
-    def check_processes(self, processes: List[Process], context: ProcedureContext) -> ProcedureContext:
-        """"""
-        self.before_check.extend(context)
-
-        for each in processes:
-            context = each.check(context)
-
-        self.after_check.extend(context)
-
-        return context
-
-    def execute_processes(self, processes: List[Process], context: ProcedureContext) -> ProcedureContext:
-        """"""
-        self.before_execute.extend(context)
-        
-        for each in processes:
-            context = each.execute(context)
-            each.set_has_run(True)
-
-        self.after_execute.extend(context)
-
-        return context
-
-    def revert_processes(self, processes: List[Process], context: ProcedureContext) -> ProcedureContext:
-        """"""
-        self.before_revert.extend(context)
-
-        for each in processes:
-            if each.get_has_run():
-                context = each.revert()
-
-        self.after_revert.extend(context)
-
-        return context
 
 
 class Procedure():
