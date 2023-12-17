@@ -1,2 +1,0 @@
-class ArgumentMissing(Exception):
-    pass

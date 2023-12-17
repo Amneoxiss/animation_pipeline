@@ -2,7 +2,7 @@ import os
 import json
 
 import vulcain.configs.vulcain as configs_path
-import vulcain.python.utils.json as json_utils
+import vulcain.python.libs.json as json_utils
 
 VULCAIN_PARAMS_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(configs_path.__file__)), "params.json")
 PROJECT_PARAMS_FILE_PATH = os.path.join(os.environ.get("VULCAIN_CONFIG_DIR_PATH"), "params.json")
