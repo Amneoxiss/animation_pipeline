@@ -1,4 +1,4 @@
-def version_increment(version):
+def increment(version):
 	"""
 	Function to Increment version number.
 	

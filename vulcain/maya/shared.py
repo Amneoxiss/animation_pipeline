@@ -1,11 +1,13 @@
 import maya.cmds as cmds
 
-from vulcain.python.logger import Logger
+from vulcain.logger import Logger
 
 logger = Logger(name="Maya Shared Modules")
 
+
 def init_new_scene():
     pass
+
 
 def create_groups_from_dict(groups:dict):
     """

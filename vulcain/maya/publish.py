@@ -1,5 +1,5 @@
 import maya.cmds as cmds
-import getSceneName, increment
+from helpers import getSceneName, version_increment
 import os
 
 def publish(ext, pubFolder):
@@ -24,7 +24,7 @@ def publish(ext, pubFolder):
 		filename = files[-1]
 
 		name = getSceneName.getName(filename)
-		verNb = increment.inc(filename)
+		verNb = version_increment.inc(filename)
 
 		#Path to publish
 		name = name+"_v"+verNb+"."+ext
