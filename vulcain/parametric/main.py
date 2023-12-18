@@ -1,8 +1,7 @@
 import os
-import json
 
 import vulcain.configs.vulcain as configs_path
-import vulcain.python.libs.json as json_utils
+import vulcain.helpers.json as json_helpers
 
 VULCAIN_PARAMS_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(configs_path.__file__)), "params.json")
 PROJECT_PARAMS_FILE_PATH = os.path.join(os.environ.get("VULCAIN_CONFIG_DIR_PATH"), "params.json")
@@ -21,13 +20,13 @@ def param(key):
 
 
 def load_vulcain_file_path():
-    return json_utils.load_data(VULCAIN_PARAMS_FILE_PATH)
+    return json_helpers.load_data(VULCAIN_PARAMS_FILE_PATH)
 
 
 def load_project_file_path():
     if not PROJECT_PARAMS_FILE_PATH:
         return dict()
-    return json_utils.load_data(PROJECT_PARAMS_FILE_PATH)
+    return json_helpers.load_data(PROJECT_PARAMS_FILE_PATH)
 
 if __name__ == "__main__":
     print(VULCAIN_PARAMS_FILE_PATH)
