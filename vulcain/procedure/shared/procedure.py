@@ -2,19 +2,19 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, List
 
-from vulcain.python.procedure.shared.vulcain_arg import VArg
-from vulcain.python.logger import Logger
-from vulcain.python.procedure.shared.uis.procedure_ui import ProcedureUI
-from vulcain.python.procedure.shared.software import Software, DefaultSoftware
-from vulcain.python.procedure.shared.process import Process
-from vulcain.python.procedure.shared.executor import Executor
+from vulcain.procedure.shared.vulcain_arg import VulcainPath
+from vulcain.logger import Logger
+from vulcain.procedure.shared.uis.procedure_ui import ProcedureUI
+from vulcain.procedure.shared.software import Software, DefaultSoftware
+from vulcain.procedure.shared.process import Process
+from vulcain.procedure.shared.executor import Executor
 
 logger = Logger(name="Maya Procedure")
 
 
 @dataclass
 class ProcedureContext:
-    varg: VArg
+    varg: VulcainPath
     name: str
     path_maker_context: dict = {}
     input_args: dict = {}

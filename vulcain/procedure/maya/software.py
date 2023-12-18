@@ -1,6 +1,6 @@
 import maya.standalone
 
-from vulcain.python.procedure.shared.software import Software
+from vulcain.procedure.shared.software import Software
 
 
 class Maya(Software):

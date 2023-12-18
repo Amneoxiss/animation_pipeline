@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-from vulcain.python.procedure.shared.procedure import ProcedureContext
-from vulcain.python.procedure.shared.process import Process
+from vulcain.procedure.shared.procedure import ProcedureContext
+from vulcain.procedure.shared.process import Process
 
 
 class Expander(ABC):

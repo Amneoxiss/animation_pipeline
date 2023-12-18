@@ -1,4 +1,4 @@
-class VArg():
+class VulcainPath():
     def __init__(self, param):
         self.param = param
         self.entity = self.param.split("~")[1]

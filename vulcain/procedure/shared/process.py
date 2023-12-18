@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from vulcain.python.procedure.shared.procedure import ProcedureContext
+from vulcain.procedure.shared.procedure import ProcedureContext
 
 
 class Process(ABC):
