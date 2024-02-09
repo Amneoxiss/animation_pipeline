@@ -4,7 +4,7 @@ from typing import Any, List
 
 from vulcain.procedure.shared.vulcain_path import VulcainPath
 from vulcain.logger import Logger
-from vulcain.procedure.shared.uis.procedure_ui import ProcedureUI
+from vulcain.procedure.shared.ui.procedure_ui import ProcedureUI
 from vulcain.procedure.shared.software import Software, DefaultSoftware
 from vulcain.procedure.shared.process import Process
 from vulcain.procedure.shared.executor import Executor
@@ -145,7 +145,7 @@ class HardProcedure():
                 self.revert_fail = True
 
         if self.dcc:
-            self.dcc.stop_dcc()
+            self.dcc.stop()
 
         self.end_launch()
 

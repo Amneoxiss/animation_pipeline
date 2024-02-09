@@ -1,3 +1,15 @@
+from enum import Enum
+
+class VulcainEntity(Enum):
+    ASSET = "asset"
+    SETDRESS = "setdress"
+    EPISODE = "episode"
+    SEQUENCE = "sequence"
+    SHOT = "shot"
+    TASK = "task"
+    VERSION = "version"
+
+
 class VulcainPath():
     def __init__(self, param):
         self.param = param
@@ -5,6 +17,21 @@ class VulcainPath():
 
     def is_asset(self):
         return self.param.split("~")[0] == "assets"
+
+    def get_vulcain_path_entity(self):
+        entity = self.path.split("/")[0]
+        if entity == VulcainEntity.ASSET:
+            pass
+        elif entity == VulcainEntity.SETDRESS:
+            pass
+        elif entity == VulcainEntity.EPISODE:
+            pass
+        elif entity == VulcainEntity.SEQUENCE:
+            pass
+        elif entity == VulcainEntity.SHOT:
+            pass
+        else:
+            raise ValueError()
 
     def is_asset_task(self):
         return len(self.entity.split("/")) >= 3
