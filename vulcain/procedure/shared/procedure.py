@@ -23,7 +23,7 @@ class ProcedureContext:
 
 
 class Procedure(ABC):
-    def __init__(self, context: ProcedureContext, ui: ProcedureUI = None, dcc: Software = None):
+    def __init__(self, context: ProcedureContext, ui: ProcedureUI = None, dcc: Software = None) -> None:
         self.context = context
         self.ui = ui
         self.dcc = dcc or DefaultSoftware()
@@ -37,9 +37,9 @@ class Procedure(ABC):
             super().__init__(message)
             self.wrong_checks = wrong_checks
 
-    def launch(self):
+    def launch(self) -> Any:
         if self.dcc:
-            self.dcc.start_dcc()
+            self.dcc.start()
 
         try:
             self.context= self.check_before_executing()
@@ -65,7 +65,7 @@ class Procedure(ABC):
                 self.revert_fail = True
 
         if self.dcc:
-            self.dcc.stop_dcc()
+            self.dcc.stop()
 
         self.end_launch()
 
@@ -123,8 +123,8 @@ class HardProcedure():
 
         try:
             self.context= self.executor.check_processes(self.processes, self.context)
-        except Process.CheckFailed as wrong_check:
-            self.wrong_check = wrong_check
+        except Process.CheckFailed as err:
+            self.wrong_check = err.wrong_check
             self.check_fail = True
         except Exception:
             logger.exception("Exception occured while checking before execution.")

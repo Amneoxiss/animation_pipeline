@@ -16,7 +16,7 @@ class VulcainPath():
         self.entity = self.param.split("~")[1]
 
     def is_asset(self):
-        return self.param.split("~")[0] == "assets"
+        return self.param.split("~")[0] == "asset"
 
     def get_vulcain_path_entity(self):
         entity = self.path.split("/")[0]
