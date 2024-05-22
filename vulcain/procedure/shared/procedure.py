@@ -1,15 +1,16 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, List
+from enum import Enum, auto
 
-from vulcain.procedure.shared.vulcain_arg import VulcainPath
+from vulcain.procedure.shared.vulcain_path import VulcainPath
 from vulcain.logger import Logger
-from vulcain.procedure.shared.uis.procedure_ui import ProcedureUI
+from vulcain.procedure.shared.ui.procedure_ui import ProcedureUI
 from vulcain.procedure.shared.software import Software, DefaultSoftware
 from vulcain.procedure.shared.process import Process
 from vulcain.procedure.shared.executor import Executor
 
-logger = Logger(name="Maya Procedure")
+logger = Logger(name="Procedure")
 
 
 @dataclass
@@ -22,67 +23,112 @@ class ProcedureContext:
     return_value: Any = None
 
 
-class Procedure():
-    def __init__(self, processes: List[Process], context: ProcedureContext, executor: Executor, ui: ProcedureUI = None, dcc: Software = None):
-        self.processes = processes
+class ProcedureStatus(Enum):
+    CHECK_FAIL = auto()
+    EXECUTE_FAIL = auto()
+    REVERT_FAIL = auto()
+    SUCCESS = auto()
+
+
+class Procedure(ABC):
+    def __init__(self, context: ProcedureContext, ui: ProcedureUI = None, dcc: Software = None) -> None:
         self.context = context
         self.ui = ui
-        self.executor = executor
         self.dcc = dcc or DefaultSoftware()
-        self.wrong_check: str = ""
-        self.check_fail: bool = False
-        self.execute_fail: bool = False
-        self.revert_fail: bool = False
+        self.wrong_checks: list = []
+        self.status: ProcedureStatus = ProcedureStatus.SUCCESS
 
-    def launch(self):
+    class CheckFailed(Exception):
+        def __init__(self, message, wrong_checks: list) -> None:
+            super().__init__(message)
+            self.wrong_checks = wrong_checks
+
+    def launch(self) -> Any:
+    
         if self.dcc:
-            self.dcc.start_dcc()
+            self.dcc.start()
 
         try:
-            self.context= self.executor.check_processes(self.processes, self.context)
-        except Process.CheckFailed as wrong_check:
-            self.wrong_check = wrong_check
-            self.check_fail = True
+            self.context = self.check()
+        except self.CheckFailed as err:
+            self.wrong_checks = err.wrong_checks
+            self.status = ProcedureStatus.CHECK_FAIL
         except Exception:
             logger.exception("Exception occured while checking before execution.")
-            self.check_fail = True
+            self.status = ProcedureStatus.CHECK_FAIL
 
-        if not self.check_fail:
+        if self.status != ProcedureStatus.CHECK_FAIL:
             try:
-                self.executor.execute_processes(self.processes, self.context)
+                self.execute()
             except Exception:
                 logger.exception("Exception occured while executing the procedure.")
-                self.execute_fail = True
+                self.status = ProcedureStatus.EXECUTE_FAIL
 
-        if self.execute_fail or self.check_fail:
+        if self.status == ProcedureStatus.CHECK_FAIL or self.status == ProcedureStatus.EXECUTE_FAIL:
             try:
-                self.executor.revert_processes(self.processes, self.context)
+                self.revert()
             except Exception:
                 logger.exception("Exception occured while reverting the procedure.")
-                self.revert_fail = True
-
-        if self.dcc:
-            self.dcc.stop_dcc()
+                self.status = ProcedureStatus.REVERT_FAIL
 
         self.end_launch()
 
+        if self.dcc:
+            self.dcc.stop()
+
         return self.context.return_value
 
+    @abstractmethod
+    def pre_check(self):
+        """"""
+
+    @abstractmethod
+    def post_check(self):
+        """"""
+
+    @abstractmethod
+    def check(self):
+        """"""
+
+    @abstractmethod
+    def pre_execute(self):
+        """"""
+
+    @abstractmethod
+    def post_execute(self):
+        """"""
+
+    @abstractmethod
+    def execute(self):
+        """"""
+
+    @abstractmethod
+    def pre_revert(self):
+        """"""
+
+    @abstractmethod
+    def post_revert(self):
+        """"""
+
+    @abstractmethod
+    def revert(self):
+        """"""
+
     def end_launch(self):
-        if self.check_fail and not self.revert_fail:
-            wrong_checks = "\n- ".join(self.wrong_check)
+        if self.status == ProcedureStatus.CHECK_FAIL and self.status != ProcedureStatus.REVERT_FAIL:
+            wrong_checks = "\n- ".join(self.wrong_checks)
             message = f"Some checks are wrong. Execution can't start.\n{wrong_checks}"
             self.ui.show_end_fail_message(self.context.name, message)
 
-        elif self.check_fail and self.revert_fail:
+        elif self.status == ProcedureStatus.CHECK_FAIL and self.status == ProcedureStatus.REVERT_FAIL:
             message = f"Revert procedure failed after a check fail."
             self.ui.show_end_fail_message(self.context.name)
 
-        elif self.execute_fail and not self.revert_fail:
+        elif self.status == ProcedureStatus.EXECUTE_FAIL and self.status != ProcedureStatus.REVERT_FAIL:
             message = f"Execution has failed."
             self.ui.show_end_fail_message(self.context.name)
 
-        elif self.execute_fail and self.revert_fail:
+        elif self.status == ProcedureStatus.EXECUTE_FAIL and self.status == ProcedureStatus.REVERT_FAIL:
             message = f"Revert procedure failed after an execution fail."
             self.ui.show_end_fail_message(self.context.name, message)
 
