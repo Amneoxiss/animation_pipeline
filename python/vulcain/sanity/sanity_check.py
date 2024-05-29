@@ -1,3 +1,4 @@
+from __future__ import annotations
 from abc import ABC, abstractmethod
 from enum import Enum, auto
 from typing import List
@@ -10,7 +11,8 @@ class SanityFailLevel(Enum):
 
 
 class SanityStatus(Enum):
-    FAIL = auto()
+    CHECK_FAIL = auto()
+    EXECUTION_FAIL = auto()
     PASSED = auto()
     RESOLVED = auto()
 
@@ -19,9 +21,7 @@ class Sanity(ABC):
     NICE_NAME: str = ""
     FAIL_LEVEL: SanityFailLevel = None
     DEFAULT_CHECK: bool = True
-
-    def __init__(self) -> None:
-        self._sanity_status: SanityStatus = None
+    DEPENDENCY: List[Sanity] = []
 
     @classmethod
     def validate(cls) -> bool:
@@ -42,14 +42,6 @@ class Sanity(ABC):
     @property
     def has_fix(self) -> bool:
         return self.__class__.fix != Sanity.fix
-
-    @property
-    def sanity_status(self) -> SanityStatus:
-        return self._sanity_status
-    
-    @sanity_status.setter
-    def sanity_status(self, status: SanityStatus) -> None:
-        self._sanity_status = status
 
 
 import random

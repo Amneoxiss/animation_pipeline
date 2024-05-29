@@ -12,7 +12,6 @@ from .asset import AssetType, AssetOrigin, AssetCategory
 class Entity(ABC):
     name: str
     id: int
-    description: str = ""
 
 
 @dataclass
@@ -40,8 +39,7 @@ class Shot(Entity):
 
 @dataclass
 class Task(Entity):
-    art_status: TaskArtStatus
-    pipeline_status: TaskPipelineStatus
+    status: TaskArtStatus
     pipeline_report: str = ""
     asset_id: int = None
     show_id: int = None

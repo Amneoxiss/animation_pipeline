@@ -1,5 +1,5 @@
 from .sanity_check import SanityFailLevel, SanityStatus, Sanity
-from .sanity_runner import SanityReport, SanityRunner
+from .sanity_runner import SanityResult, SanityRunner
 
 __all__ = [
     # sanity_check
@@ -8,6 +8,6 @@ __all__ = [
     "Sanity",
     
     # sanity_runner
-    "SanityReport",
+    "SanityResult",
     "SanityRunner"
 ]

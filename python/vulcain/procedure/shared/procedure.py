@@ -3,21 +3,19 @@ from dataclasses import dataclass
 from typing import Any, List
 from enum import Enum, auto
 
-from vulcain.procedure.shared.vulcain_path import VulcainPath
+from vulcain.context import VulcainContext
 from vulcain.logger import Logger
 from vulcain.procedure.shared.ui.procedure_ui import ProcedureUI
 from vulcain.procedure.shared.software import Software, DefaultSoftware
-from vulcain.procedure.shared.process import Process
-from vulcain.procedure.shared.executor import Executor
+from vulcain.context import VulcainContext
+
 
 logger = Logger(name="Procedure")
 
 
 @dataclass
 class ProcedureContext:
-    varg: VulcainPath
-    name: str
-    path_maker_context: dict = {}
+    context = VulcainContext
     input_args: dict = {}
     any_context: dict = {}
     return_value: Any = None
@@ -31,7 +29,7 @@ class ProcedureStatus(Enum):
 
 
 class Procedure(ABC):
-    def __init__(self, context: ProcedureContext, ui: ProcedureUI = None, dcc: Software = None) -> None:
+    def __init__(self, context: VulcainContext, ui: ProcedureUI = None, dcc: Software = None) -> None:
         self.context = context
         self.ui = ui
         self.dcc = dcc or DefaultSoftware()
