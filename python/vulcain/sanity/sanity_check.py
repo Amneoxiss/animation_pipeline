@@ -43,6 +43,20 @@ class Sanity(ABC):
     def has_fix(self) -> bool:
         return self.__class__.fix != Sanity.fix
 
+    def run(self) -> List[str]:
+        result: List[str] = []
+        
+        if self.DEPENDENCY:
+            for each in self.DEPENDENCY:
+                result = each.run()
+                if result :
+                    break
+        
+        if not result:
+            result = self.check()
+
+        return result
+
 
 import random
 
