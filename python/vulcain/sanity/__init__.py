@@ -1,13 +1,14 @@
-from .sanity_check import SanityFailLevel, SanityStatus, Sanity
-from .sanity_runner import SanityResult, SanityRunner
+from .sanity_check import SanityFailLevel, Sanity
+from .sanity_runner import SanityResult, SanityStatus, get_sanity_result, run_and_fix_sanity
 
 __all__ = [
     # sanity_check
     "SanityFailLevel",
-    "SanityStatus",
     "Sanity",
     
     # sanity_runner
     "SanityResult",
-    "SanityRunner"
+    "SanityStatus",
+    "get_sanity_result",
+    "run_and_fix_sanity"
 ]
