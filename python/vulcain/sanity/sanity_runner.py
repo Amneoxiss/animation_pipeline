@@ -1,6 +1,15 @@
 from dataclasses import dataclass, field
-from .sanity_check import Sanity, SanityStatus, SanityFailLevel
-from typing import Tuple, List
+from enum import Enum, auto
+from typing import List
+
+from .sanity_check import Sanity, SanityFailLevel
+
+
+class SanityStatus(Enum):
+    CHECK_FAIL = auto()
+    EXECUTION_FAIL = auto()
+    PASSED = auto()
+    RESOLVED = auto()
 
 
 @dataclass

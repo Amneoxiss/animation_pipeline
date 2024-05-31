@@ -10,13 +10,6 @@ class SanityFailLevel(Enum):
     INFO = auto()
 
 
-class SanityStatus(Enum):
-    CHECK_FAIL = auto()
-    EXECUTION_FAIL = auto()
-    PASSED = auto()
-    RESOLVED = auto()
-
-
 class Sanity(ABC):
     NICE_NAME: str = ""
     FAIL_LEVEL: SanityFailLevel = None
@@ -25,6 +18,10 @@ class Sanity(ABC):
 
     @classmethod
     def validate(cls) -> bool:
+        """
+        Method to check that the minimum informations required to run properly the sanity exists.
+        The two constants NICE_NAME and FAIL LEVEL needs to be filled.
+        """
         return all(
             [
                 cls.NICE_NAME,
@@ -45,44 +42,14 @@ class Sanity(ABC):
 
     def run(self) -> List[str]:
         result: List[str] = []
-        
-        if self.DEPENDENCY:
-            for each in self.DEPENDENCY:
-                result = each.run()
-                if result :
-                    break
+
+        for sanity in self.DEPENDENCY:
+            result = sanity.run()
+            if result:
+                result = [f"Sanity '{sanity.NICE_NAME}' has failed. Can't perform current check."]
+                break
         
         if not result:
             result = self.check()
 
         return result
-
-
-import random
-
-
-class CheckVersionUpdater(Sanity):
-    FAIL_LEVEL = SanityFailLevel.INFO
-
-    def check(self) -> List[str]:
-        if random.choice([True, False]):
-            print("Check Version Updater is good")
-        else:
-            return ["HEIN", "OUI", "NON"]
-
-
-class CheckAnotherThing(Sanity):
-    def check(self) -> List[str]:
-        if random.choice([True, False]):
-            print("Oui Oui Oui")
-        else:
-            return ["HEIN", "OUI", "NON"]
-    def fix(self) -> None:
-        print("Hola !")
-
-
-if __name__ == "__main__":
-    print(CheckVersionUpdater().validate())
-    sanity_01 = CheckVersionUpdater()
-    result = sanity_01.check()
-    print(result)
